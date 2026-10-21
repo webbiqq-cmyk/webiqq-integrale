@@ -7,7 +7,7 @@
 import { cpSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { products } from './src/content/products.mjs';
-import { home, studio, cafe, shop, product, visit, notFound } from './build/pages.mjs';
+import { home, space, cafe, shop, product, visit, notFound } from './build/pages.mjs';
 
 const out = new URL('./dist/', import.meta.url).pathname;
 
@@ -17,7 +17,7 @@ cpSync(new URL('./src/assets/', import.meta.url).pathname, join(out, 'assets'), 
 
 const pages = {
   'index.html': home(),
-  'studio.html': studio(),
+  'space.html': space(),
   'cafe.html': cafe(),
   'shop.html': shop(),
   'visit.html': visit(),

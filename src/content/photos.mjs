@@ -6,7 +6,7 @@
 export const photos = {
   'diablo-interior': {
     alt: 'A purple Lamborghini Diablo VT seen from behind on the herringbone floor at integrale, with tall windows, plants and cane-backed chairs to the left.',
-    caption: 'Lamborghini Diablo VT on the floor at integrale',
+    caption: 'Lamborghini Diablo VT in the café',
     date: 'October 2023',
     pos: '62% 60%',
     posMobile: '72% 62%',
@@ -25,8 +25,19 @@ export const photos = {
   },
   counter: {
     alt: 'The coffee bar: an espresso machine, pale blue cups, a lit pastry case and the integrale monogram on the wall, with a barista at work.',
-    caption: 'The coffee bar',
-    pos: '50% 45%',
+    caption: 'Behind the bar',
+    pos: '42% 50%',
+  },
+  lounge: {
+    alt: 'Cane-backed chairs and a stone table in daylight by tall windows, with plants and the back of a purple Lamborghini Diablo at the edge of the frame.',
+    caption: 'The window seats, with the Diablo VT beyond',
+    date: 'October 2023',
+    pos: '40% 40%',
+  },
+  rail: {
+    alt: 'A lit shelf with T-shirts on a rail, model cars, a Type 7 Volume Four magazine, a cap and a stack of books.',
+    caption: 'T-shirts, books and models on the shelves',
+    pos: '50% 50%',
   },
   'mercedes-window': {
     alt: 'A white Mercedes-Benz parked inside by the front windows, with a hedge and outdoor seating beyond the glass.',
@@ -40,8 +51,9 @@ export const photos = {
   },
   table: {
     alt: 'Two coffees in pale blue integrale cups, glass bottles of water and a slice of cheesecake on a glass table between cane-backed chairs.',
-    caption: 'Coffee at the window seats',
-    pos: '50% 62%',
+    caption: 'Two coffees and a slice of cheesecake by the window',
+    pos: '42% 64%',
+    posMobile: '34% 70%',
   },
   facade: {
     alt: 'The integrale sign and monogram on the curved glass front of the building, against a blue sky.',
@@ -55,12 +67,12 @@ export const photos = {
   },
   'counter-stair': {
     alt: 'The bright coffee counter with a glass staircase and the backlit monogram.',
-    caption: 'The counter and the stair',
+    caption: 'The counter, from the stair',
     pos: '50% 50%',
   },
   'm-918-chairs': {
     alt: 'A silver Porsche beside a white table with books and a coffee cup, and white sculptural chairs.',
-    caption: 'Books, a coffee and a Porsche',
+    caption: 'A coffee and a stack of books',
     pos: '50% 50%',
   },
   'm-964-display': {
@@ -81,11 +93,6 @@ export const photos = {
   'm-testarossa-bags': {
     alt: 'A red sports car with its front compartment open and filled with small, colourful handbags, on a herringbone floor.',
     caption: 'Handbags in the front boot',
-    pos: '50% 50%',
-  },
-  'm-red-bag': {
-    alt: 'A red quilted handbag held beside the wheel of a red car, with red heels standing on printed posters.',
-    caption: 'Red on red',
     pos: '50% 50%',
   },
 };

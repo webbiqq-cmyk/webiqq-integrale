@@ -1,6 +1,6 @@
 # integrale — concept website
 
-Static site for integrale (automotive studio, café and shop at Al Liwan, Hamala, Bahrain), prepared by WebiQQ.
+Static site for integrale, a café at Al Liwan, Hamala, Bahrain, with cars on display and a few things to take home. Prepared by WebiQQ.
 
 ```
 npm run build   # writes dist/ (no dependencies, Node 18+)
@@ -15,7 +15,8 @@ Vercel builds with `node build.mjs` and serves `dist/` (see `vercel.json`).
 | --- | --- |
 | Address, hours, Instagram, nav | `src/content/business.mjs` |
 | Photo alt text, captions, focal points | `src/content/photos.mjs` |
-| Studio archive and homepage moments | `src/content/studio.mjs` |
+| Page copy (headlines, intros, notes) | `src/content/copy.mjs` |
+| Cars on display / past displays | `src/content/space.mjs` |
 | Café menu | `src/content/menu.mjs` |
 | Shop products | `src/content/products.mjs` |
 | Page templates / shared markup | `build/pages.mjs`, `build/components.mjs` |
@@ -28,7 +29,8 @@ Images live in `src/assets/img` as `<name>-<width>.jpg|webp`; their sizes are li
 
 - **Opening hours**: unconfirmed and not shown. Set `hours.status` to `'confirmed'` to publish them (an open/closed note in Bahrain time then appears).
 - **Menu**: every item is a sample. Replace the items, add prices, and set `menu.status` to `'confirmed'`.
-- **Shop**: every product is a concept illustration, nothing is for sale, and there is no checkout. The "list" stays in the visitor's browser and is never sent anywhere.
-- **Logo**: the monogram is a redraw traced from photos (`src/assets/brand/monogram.svg`), and the wordmark is set in Newsreader. Replace both with the original artwork.
+- **Shop**: the five pieces are proposed designs drawn as flat sketches; nothing is for sale and there is no checkout. "Saved items" stay in the visitor's browser and are never sent anywhere. Real product photographs (or realistic concept renders) would replace the sketches.
+- **Logo**: the monogram is a redraw traced from photos (`src/assets/brand/monogram.svg`); the wordmark (`wordmark.svg`) is outlined from Newsreader as a stand-in. Replace both with the original artwork.
+- **Displayed cars**: every car photo is from past Instagram posts. Nothing on the site states what is on display now.
 - **Photography**: several photos are crops of Instagram screenshots (at most 1320px wide). Use the original files where possible.
 - **Accounts**: only @integrale__ is shown. The @integralecoffee and @integralecars accounts linked from the old demo are unconfirmed.

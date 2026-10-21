@@ -49,24 +49,6 @@
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   }
 
-  /* ---------- Quiet reveal for images below the fold ---------- */
-  if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
-      });
-    }, { rootMargin: '0px 0px -8% 0px' });
-    $$('main .fig, main .product-card, main .gallery li, main .life-card').forEach(function (el) {
-      if (el.getBoundingClientRect().top > window.innerHeight) {
-        el.classList.add('reveal');
-        io.observe(el);
-      }
-    });
-    window.addEventListener('beforeprint', function () {
-      $$('.reveal').forEach(function (el) { el.classList.add('in'); });
-    });
-  }
-
   /* ---------- List (stored on this device only) ---------- */
   var KEY = 'integrale-list-v1';
   function readList() {
@@ -84,7 +66,7 @@
     var n = totalQty(readList());
     $$('[data-list-count]').forEach(function (el) {
       el.textContent = n;
-      el.classList.toggle('has-items', n > 0);
+      el.hidden = n === 0;
     });
   }
 
@@ -104,8 +86,8 @@
     var items = readList();
     if (!items.length) {
       listBody.innerHTML =
-        '<div class="list-empty"><p>Your list is empty. Pieces you add from the shop will appear here.</p>' +
-        '<a class="link" href="/shop"><span>Browse the shop</span> <span class="arrow" aria-hidden="true">→</span></a></div>';
+        '<div class="list-empty"><p>Nothing saved yet. Pieces you save in the shop will appear here.</p>' +
+        '<a class="more" href="/shop"><span>Visit the shop</span><span class="arrow" aria-hidden="true">→</span></a></div>';
       return;
     }
     listBody.innerHTML =
@@ -122,8 +104,8 @@
         '</li>';
       }).join('') + '</ul>' +
       '<div class="list-actions">' +
-        '<button type="button" class="btn btn-wide" data-list-copy>Copy list</button>' +
-        '<button type="button" class="text-button" data-list-clear>Clear list</button>' +
+        '<button type="button" class="btn btn-wide" data-list-copy>Copy as text</button>' +
+        '<button type="button" class="text-button" data-list-clear>Clear saved items</button>' +
       '</div>';
   }
 
@@ -159,7 +141,7 @@
         next.focus();
       } else if (t.hasAttribute('data-list-clear')) {
         writeList([]); renderList(); updateCount();
-        listStatus.textContent = 'List cleared.';
+        listStatus.textContent = 'Saved items cleared.';
         $('[data-list-close]', dialog).focus();
       } else if (t.hasAttribute('data-list-copy')) {
         copyList(items);
@@ -168,7 +150,7 @@
   }
 
   function copyList(items) {
-    var text = 'integrale — my list\n' + items.map(function (i) {
+    var text = 'integrale — saved items\n' + items.map(function (i) {
       return '• ' + i.name + (optsText(i) ? ' (' + optsText(i) + ')' : '') + ' × ' + i.qty;
     }).join('\n');
     function fallback() {
@@ -178,11 +160,11 @@
       var ta = document.createElement('textarea');
       ta.className = 'list-copy-fallback';
       ta.readOnly = true;
-      ta.setAttribute('aria-label', 'Your list as text');
+      ta.setAttribute('aria-label', 'Saved items as text');
       ta.value = text;
       listBody.appendChild(ta);
       ta.focus(); ta.select();
-      listStatus.textContent = 'Copying isn’t available here. The list is selected below so you can copy it yourself.';
+      listStatus.textContent = 'Copying isn’t available here. The text is selected below so you can copy it yourself.';
     }
     if (navigator.clipboard && window.isSecureContext) {
       // Some browsers never settle the promise when access is blocked.
@@ -258,39 +240,36 @@
       })[0];
       if (same) same.qty = Math.min(20, same.qty + 1); else items.push(entry);
       if (!writeList(items)) {
-        status.textContent = 'Your browser isn’t letting this site save a list, so it couldn’t be added.';
+        status.textContent = 'Your browser isn’t letting this site save anything, so this piece wasn’t saved.';
         return;
       }
       updateCount();
-      status.innerHTML = 'Added to your list. <button type="button" class="text-button" data-list-open-inline>View list</button>';
+      status.innerHTML = 'Saved on this device. <button type="button" class="text-button" data-list-open-inline>View saved items</button>';
       $('[data-list-open-inline]', status).addEventListener('click', function (ev) { openList(ev.currentTarget); });
     });
   }
 
-  /* ---------- Shop filter ---------- */
-  var grid = $('[data-product-grid]');
-  if (grid) {
-    var chips = $$('.filters [data-filter]');
-    var countEl = $('[data-filter-count]');
-    var emptyEl = $('[data-filter-empty]');
-    function applyFilter(cat) {
-      var shown = 0;
-      $$('.product-card', grid).forEach(function (card) {
-        var on = cat === 'all' || card.getAttribute('data-category') === cat;
-        card.hidden = !on;
-        if (on) shown++;
+  /* ---------- Menu: highlight the category in view ---------- */
+  var menuLinks = $$('.menu-bar a[href^="#"]');
+  if (menuLinks.length) {
+    var sections = menuLinks.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
+    var ticking = false;
+    var markCurrent = function () {
+      ticking = false;
+      var current = null;
+      sections.forEach(function (sec) { if (sec && sec.getBoundingClientRect().top <= 120) current = sec; });
+      menuLinks.forEach(function (a, i) {
+        if (sections[i] === current) a.setAttribute('aria-current', 'true');
+        else a.removeAttribute('aria-current');
       });
-      $$('[data-life]', grid).forEach(function (el) { el.hidden = cat !== 'all'; });
-      chips.forEach(function (c) { c.setAttribute('aria-pressed', String(c.getAttribute('data-filter') === cat)); });
-      countEl.textContent = shown + (shown === 1 ? ' piece' : ' pieces');
-      emptyEl.hidden = shown > 0;
-    }
-    $$('[data-filter]').forEach(function (c) {
-      c.addEventListener('click', function () { applyFilter(c.getAttribute('data-filter')); });
-    });
+    };
+    window.addEventListener('scroll', function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(markCurrent); }
+    }, { passive: true });
+    markCurrent();
   }
 
-  /* ---------- Studio lightbox ---------- */
+  /* ---------- Past displays lightbox ---------- */
   var lb = $('#lightbox');
   var dataEl = $('#gallery-data');
   if (lb && dataEl) {

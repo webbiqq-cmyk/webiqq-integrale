@@ -2,6 +2,7 @@
 
 import { readFileSync } from 'node:fs';
 import { business, nav } from '../src/content/business.mjs';
+import { footer as footerCopy } from '../src/content/copy.mjs';
 import { photos } from '../src/content/photos.mjs';
 import { categories } from '../src/content/products.mjs';
 import { renderView, colourVars } from './mockups.mjs';
@@ -24,13 +25,27 @@ const flat = (v) => (Array.isArray(v) ? v.map(flat).join('') : v === null || v =
 export const esc = (s) =>
   String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
+// Multi-line copy ("A\nB") to <br>-separated HTML.
+export const lines = (s) => esc(s).split('\n').join('<br>');
+
 export const ext = (href, label) => `<a href="${href}" target="_blank" rel="noopener">${label}<span class="vh"> (opens in a new tab)</span></a>`;
 
 export const instagramLink = (label = `@${business.instagram.handle}`) => ext(business.instagram.url, esc(label));
 
+export const arrow = '<span class="arrow" aria-hidden="true">→</span>';
+export const more = (href, label) => `<a class="more" href="${href}"><span>${label}</span>${arrow}</a>`;
+export const directionsButton = (cls = 'btn') =>
+  `<a class="${cls}" href="${business.location.mapsUrl}" target="_blank" rel="noopener">Get directions<span class="vh"> (opens Google Maps in a new tab)</span></a>`;
+
 export const monogram = monogramSvg;
 
+export const brand = () =>
+  `<a class="brand" href="/" aria-label="integrale, home">${monogram}<img class="wordmark" src="/assets/brand/wordmark.svg" alt="" width="114" height="30"></a>`;
+
 export const categoryLabel = (id) => categories.find((c) => c.id === id)?.label ?? id;
+
+export const hoursText =
+  business.hours.status === 'confirmed' ? business.hours.summary : 'Being confirmed — check Instagram before a special trip';
 
 // ---------- Images ----------
 
@@ -75,45 +90,54 @@ ${text ? html`<figcaption>${esc(text)}${date && meta.date ? html`<span class="da
 </figure>`;
 }
 
+// ---------- Menu ----------
+
+export function menuItem(item, currency) {
+  return html`<li class="menu-item">
+  <span class="menu-name">${esc(item.name)}</span>
+  ${item.price !== null ? html`<span class="menu-price">${currency} ${esc(item.price)}</span>` : ''}
+  <span class="menu-note">${esc(item.note)}</span>
+</li>`;
+}
+
 // ---------- Products ----------
 
-export function productCard(p, { sizes = '(min-width: 1100px) 25vw, 50vw', headingLevel = 3 } = {}) {
-  const view = p.views[0];
-  const colour = p.colours?.[0];
+export function productCard(p, { headingLevel = 3, compact = false } = {}) {
   const h = `h${headingLevel}`;
-  return html`<article class="product-card" data-category="${p.category}">
+  return html`<article class="product-card${compact ? ' product-card-compact' : ''}" data-category="${p.category}">
 <a href="/shop/${p.slug}" class="product-link">
-  <div class="stage" style="${colourVars(colour)}">${renderView(p, view)}</div>
+  <div class="stage" style="${colourVars(p.colours?.[0])}">${renderView(p, p.views[0])}</div>
   <${h} class="product-name">${esc(p.name)}</${h}>
 </a>
-<p class="product-meta"><span>${categoryLabel(p.category)}</span>${p.colours?.length > 1 ? html`<span>${p.colours.length} colours</span>` : ''}${p.concept ? '<span class="tag">Concept</span>' : ''}</p>
+<p class="product-meta">${p.proposed ? 'Proposed design' : esc(p.price ?? '')}${!compact && p.colours?.length > 1 ? html` · ${p.colours.length} colours` : ''}</p>
 </article>`;
 }
 
 // ---------- Page shell ----------
 
 function header(active) {
+  const links = nav.map((n) => html`<li><a href="${n.href}"${active === n.key ? ' aria-current="page"' : ''}>${n.label}</a></li>`);
   return html`<header class="site-header">
 <div class="wrap header-inner">
-  <a class="brand" href="/" aria-label="integrale, home">${monogram}<span class="wordmark" aria-hidden="true">integrale</span></a>
-  <nav class="primary-nav" aria-label="Main">
-    <ul>${nav.map((n) => html`<li><a href="${n.href}"${active === n.key ? ' aria-current="page"' : ''}>${n.label}</a></li>`)}</ul>
-  </nav>
+  ${brand()}
+  <nav class="primary-nav" aria-label="Main"><ul>${links}</ul></nav>
   <div class="header-actions">
-    <button type="button" class="list-button" data-list-open aria-haspopup="dialog">List <span class="count" data-list-count>0</span><span class="vh"> items</span></button>
-    <button type="button" class="menu-button" data-menu-open aria-expanded="false" aria-controls="mobile-menu">Menu</button>
+    <button type="button" class="saved-button" data-list-open aria-haspopup="dialog">Saved<span class="count" data-list-count hidden>0</span><span class="vh"> items</span></button>
+    <a class="menu-link" href="/cafe#menu">Menu</a>
+    <button type="button" class="nav-button" data-menu-open aria-expanded="false" aria-controls="mobile-menu" aria-label="Open navigation"><span aria-hidden="true"></span></button>
   </div>
 </div>
 </header>
 <div class="mobile-menu" id="mobile-menu" hidden>
   <div class="wrap mobile-menu-top">
-    <a class="brand" href="/" aria-label="integrale, home">${monogram}<span class="wordmark" aria-hidden="true">integrale</span></a>
-    <button type="button" class="menu-button" data-menu-close>Close</button>
+    ${brand()}
+    <button type="button" class="text-button" data-menu-close>Close</button>
   </div>
-  <nav class="wrap" aria-label="Main">
-    <ul>${nav.map((n) => html`<li><a href="${n.href}"${active === n.key ? ' aria-current="page"' : ''}>${n.label}</a></li>`)}</ul>
-  </nav>
-  <p class="wrap mobile-menu-foot">${business.location.label}, ${business.location.country} · ${instagramLink()}</p>
+  <nav class="wrap" aria-label="Main"><ul>${links}</ul></nav>
+  <div class="wrap mobile-menu-foot">
+    <button type="button" class="text-button" data-list-open aria-haspopup="dialog">Saved items <span class="count" data-list-count hidden>0</span></button>
+    <p>${business.location.label}, ${business.location.country} · ${instagramLink()}</p>
+  </div>
 </div>`;
 }
 
@@ -121,24 +145,18 @@ function footer() {
   return html`<footer class="site-footer">
 <div class="wrap footer-grid">
   <div class="footer-brand">
-    <a class="brand" href="/" aria-label="integrale, home">${monogram}<span class="wordmark" aria-hidden="true">integrale</span></a>
-    <p>An automotive studio, café and shop at ${business.location.label}, ${business.location.country}.</p>
+    ${brand()}
+    <p>${esc(footerCopy.text)}</p>
   </div>
   <nav class="footer-nav" aria-label="Footer">
-    <h2 class="label">Explore</h2>
     <ul>${nav.map((n) => html`<li><a href="${n.href}">${n.label}</a></li>`)}</ul>
   </nav>
-  <div class="footer-nav">
-    <h2 class="label">Find us</h2>
-    <ul>
-      <li>${ext(business.location.mapsUrl, 'Directions')}</li>
-      <li>${instagramLink('Instagram')}</li>
-    </ul>
-  </div>
+  <ul class="footer-nav">
+    <li>${ext(business.location.mapsUrl, 'Directions')}</li>
+    <li>${instagramLink('Instagram')}</li>
+  </ul>
 </div>
-<div class="wrap footer-base">
-  <p>Concept website for integrale, prepared by WebiQQ. Menu items and shop pieces shown are samples and proposals.</p>
-</div>
+<div class="wrap footer-base"><p>${esc(footerCopy.note)}</p></div>
 </footer>`;
 }
 
@@ -146,37 +164,58 @@ function listDialog() {
   return html`<dialog class="drawer" id="list-dialog" aria-labelledby="list-title">
 <div class="drawer-inner">
   <div class="drawer-head">
-    <h2 id="list-title">Your list</h2>
+    <h2 id="list-title">Saved items</h2>
     <button type="button" class="text-button" data-list-close>Close</button>
   </div>
-  <p class="drawer-note">There is no online checkout. Your list is kept on this device only, so you can show it at the counter. Nothing is sent anywhere.</p>
+  <p class="drawer-note">Pieces you save are kept on this device only. Nothing is ordered or sent anywhere, and there is no online checkout.</p>
   <div data-list-body></div>
   <p class="status" role="status" data-list-status></p>
 </div>
 </dialog>`;
 }
 
+function structuredData() {
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'CafeOrCoffeeShop',
+    name: business.name,
+    description: business.description,
+    image: '/assets/img/table-1359.jpg',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: business.location.locality,
+      addressCountry: business.location.countryCode,
+    },
+    sameAs: [business.instagram.url],
+  };
+  return `<script type="application/ld+json">${JSON.stringify(data)}</script>`;
+}
+
 export function page({ title, description, active, body, path = '/' }) {
-  const fullTitle = title ? `${title} — integrale` : 'integrale — Studio, café and shop at Al Liwan, Hamala';
+  const fullTitle = title ? `${title} — integrale` : 'integrale — Café in Al Liwan, Hamala';
+  const desc = description ?? business.description;
   return html`<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(fullTitle)}</title>
-<meta name="description" content="${esc(description ?? business.description)}">
-<meta name="theme-color" content="#F4F1EA">
+<meta name="description" content="${esc(desc)}">
+<meta name="theme-color" content="#F6F4EE">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="integrale">
 <meta property="og:title" content="${esc(fullTitle)}">
-<meta property="og:description" content="${esc(description ?? business.description)}">
-<meta property="og:image" content="/assets/img/diablo-interior-960.jpg">
+<meta property="og:description" content="${esc(desc)}">
+<meta property="og:image" content="/assets/img/table-1359.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/brand/favicon.svg" type="image/svg+xml">
-<link rel="preload" href="/assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/assets/fonts/hanken-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/instrument-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/young-serif.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/site.css">
-<script>document.documentElement.classList.add('js')</script>
 <script src="/assets/js/site.js" defer></script>
+${path === '/' ? structuredData() : ''}
 </head>
-<body data-path="${path}">
+<body>
 <a class="skip-link" href="#main">Skip to content</a>
 ${header(active)}
 <main id="main" tabindex="-1">

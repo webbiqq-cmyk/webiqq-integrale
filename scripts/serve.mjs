@@ -2,6 +2,7 @@
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
+import { redirects } from '../src/content/business.mjs';
 
 const root = new URL('../dist/', import.meta.url).pathname;
 const port = Number(process.env.PORT) || 4173;
@@ -16,6 +17,8 @@ async function file(p) {
 
 createServer(async (req, res) => {
   const url = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+  const r = redirects.find((x) => x.from === url);
+  if (r) { res.writeHead(308, { location: r.to }); return res.end(); }
   const safe = normalize(url).replace(/^(\.\.[/\\])+/, '');
   const target =
     (await file(join(root, safe))) ||

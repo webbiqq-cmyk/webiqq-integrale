@@ -8,14 +8,55 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, follow" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
       ]
     },
     {
       "source": "/assets/(img|fonts)/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/studio",
+      "destination": "/space",
+      "permanent": true
+    },
+    {
+      "source": "/shop/wordmark-long-sleeve",
+      "destination": "/shop",
+      "permanent": true
+    },
+    {
+      "source": "/shop/murcielago-print",
+      "destination": "/shop",
+      "permanent": true
+    },
+    {
+      "source": "/shop/key-tag",
+      "destination": "/shop",
+      "permanent": true
+    },
+    {
+      "source": "/shop/studio-cap",
+      "destination": "/shop/cap",
+      "permanent": true
     }
   ]
 }

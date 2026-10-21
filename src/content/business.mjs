@@ -5,13 +5,15 @@
 
 export const business = {
   name: 'integrale',
-  description: 'An automotive studio, café and shop at Al Liwan, Hamala, Bahrain.',
+  description: 'A café in Al Liwan, Hamala, with good coffee, cars on display and room to stay a while.',
 
   location: {
     // Consistent across the previous demo and a third-party listing.
     // Shown, but listed as "to confirm" in the hand-over notes.
     label: 'Al Liwan, Hamala',
+    locality: 'Hamala',
     country: 'Bahrain',
+    countryCode: 'BH',
     status: 'confirmed',
     mapsUrl:
       'https://www.google.com/maps/search/?api=1&query=integrale%20Al%20Liwan%20Hamala%20Bahrain',
@@ -24,8 +26,9 @@ export const business = {
   },
 
   hours: {
-    // From the previous demo only. The open/closed indicator stays off until
-    // status is 'confirmed'. Days use 0 = Sunday, times are Asia/Bahrain.
+    // From the previous demo only. Nothing about hours (and no open/closed
+    // note) is shown until status is 'confirmed'. Days use 0 = Sunday,
+    // times are Asia/Bahrain.
     status: 'unconfirmed',
     timeZone: 'Asia/Bahrain',
     weekly: [0, 1, 2, 3, 4, 5, 6].map((day) => ({ day, open: '08:00', close: '23:00' })),
@@ -50,8 +53,17 @@ export const business = {
 };
 
 export const nav = [
-  { href: '/studio', label: 'Studio', key: 'studio' },
-  { href: '/cafe', label: 'Café', key: 'cafe' },
+  { href: '/cafe', label: 'Café & Menu', key: 'cafe' },
+  { href: '/space', label: 'The Space', key: 'space' },
   { href: '/shop', label: 'Shop', key: 'shop' },
   { href: '/visit', label: 'Visit', key: 'visit' },
+];
+
+// Old routes kept working after renames and catalogue trims.
+export const redirects = [
+  { from: '/studio', to: '/space' },
+  { from: '/shop/wordmark-long-sleeve', to: '/shop' },
+  { from: '/shop/murcielago-print', to: '/shop' },
+  { from: '/shop/key-tag', to: '/shop' },
+  { from: '/shop/studio-cap', to: '/shop/cap' },
 ];

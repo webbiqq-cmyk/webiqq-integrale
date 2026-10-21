@@ -1,7 +1,8 @@
 // Café menu. No confirmed menu has been supplied, so `status` is 'sample'
-// and the page says so. Replace items with integrale's own and set
+// and the site says so. Replace items with integrale's own and set
 // status to 'confirmed'. Leave `price` as null until prices are confirmed;
-// prices are only rendered when present.
+// prices are only rendered when present. Only add dietary or allergen
+// notes once they are confirmed by the café.
 
 export const menu = {
   status: 'sample',
@@ -39,5 +40,5 @@ export const menu = {
   ],
 };
 
-// Items shown in the short preview on the homepage.
-export const menuPreview = ['Espresso', 'Flat white', 'Latte', 'Filter', 'Matcha latte', 'Basque cheesecake'];
+// Items shown in the homepage preview.
+export const menuPreview = ['Flat white', 'Latte', 'Matcha latte', 'Basque cheesecake'];

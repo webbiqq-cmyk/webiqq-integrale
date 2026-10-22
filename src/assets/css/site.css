@@ -346,8 +346,8 @@ body.page-home { padding-top: 0; }
   .hero-accent-wrap { width: clamp(108px, 22vw, 150px); bottom: clamp(24px, 5vw, 48px); }
 }
 @media (max-width: 699px) {
-  .hero-full { min-height: 92vh; align-items: flex-end; }
-  .hero-content { padding-block: clamp(56px, 10vw, 88px) clamp(32px, 6vw, 56px); }
+  .hero-full { min-height: 82vh; align-items: flex-end; }
+  .hero-content { padding-block: clamp(40px, 8vw, 64px) clamp(20px, 4vw, 36px); }
   .hero-accent-wrap { display: none; }
 }
 

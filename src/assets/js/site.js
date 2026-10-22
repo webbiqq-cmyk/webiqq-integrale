@@ -49,206 +49,6 @@
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   }
 
-  /* ---------- List (stored on this device only) ---------- */
-  var KEY = 'integrale-list-v1';
-  function readList() {
-    try { var v = JSON.parse(localStorage.getItem(KEY)); return Array.isArray(v) ? v : []; }
-    catch (e) { return []; }
-  }
-  function writeList(items) {
-    try { localStorage.setItem(KEY, JSON.stringify(items)); return true; }
-    catch (e) { return false; }
-  }
-  function totalQty(items) { return items.reduce(function (n, i) { return n + i.qty; }, 0); }
-  function optsText(i) { return [i.colour, i.size, i.format].filter(Boolean).join(' · '); }
-
-  function updateCount() {
-    var n = totalQty(readList());
-    $$('[data-list-count]').forEach(function (el) {
-      el.textContent = n;
-      el.hidden = n === 0;
-    });
-  }
-
-  var dialog = $('#list-dialog');
-  var listBody = dialog && $('[data-list-body]', dialog);
-  var listStatus = dialog && $('[data-list-status]', dialog);
-  var lastOpener = null;
-
-  function esc(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
-
-  function renderList() {
-    if (!listBody) return;
-    var items = readList();
-    if (!items.length) {
-      listBody.innerHTML =
-        '<div class="list-empty"><p>Nothing saved yet. Pieces you save in the shop will appear here.</p>' +
-        '<a class="more" href="/shop"><span>Visit the shop</span><span class="arrow" aria-hidden="true">→</span></a></div>';
-      return;
-    }
-    listBody.innerHTML =
-      '<ul class="list-items">' + items.map(function (i, n) {
-        return '<li>' +
-          '<p class="list-name"><a href="/shop/' + esc(i.slug) + '">' + esc(i.name) + '</a></p>' +
-          '<p class="list-opts">' + esc(optsText(i) || 'No options') + '</p>' +
-          '<div class="qty" role="group" aria-label="Quantity of ' + esc(i.name) + '">' +
-            '<button type="button" data-qty="-1" data-i="' + n + '" aria-label="One fewer">−</button>' +
-            '<output aria-live="polite">' + i.qty + '</output>' +
-            '<button type="button" data-qty="1" data-i="' + n + '" aria-label="One more">+</button>' +
-          '</div>' +
-          '<button type="button" class="text-button list-remove" data-remove="' + n + '">Remove<span class="vh"> ' + esc(i.name) + '</span></button>' +
-        '</li>';
-      }).join('') + '</ul>' +
-      '<div class="list-actions">' +
-        '<button type="button" class="btn btn-wide" data-list-copy>Copy as text</button>' +
-        '<button type="button" class="text-button" data-list-clear>Clear saved items</button>' +
-      '</div>';
-  }
-
-  function openList(opener) {
-    if (!dialog) return;
-    lastOpener = opener || document.activeElement;
-    listStatus.textContent = '';
-    renderList();
-    dialog.showModal();
-  }
-
-  if (dialog) {
-    $$('[data-list-open]').forEach(function (b) { b.addEventListener('click', function () { openList(b); }); });
-    $('[data-list-close]', dialog).addEventListener('click', function () { dialog.close(); });
-    dialog.addEventListener('click', function (e) { if (e.target === dialog) dialog.close(); });
-    dialog.addEventListener('close', function () { if (lastOpener && lastOpener.focus) lastOpener.focus(); });
-
-    listBody.addEventListener('click', function (e) {
-      var t = e.target.closest('button');
-      if (!t) return;
-      var items = readList();
-      if (t.hasAttribute('data-qty')) {
-        var i = +t.getAttribute('data-i');
-        items[i].qty = Math.max(1, Math.min(20, items[i].qty + +t.getAttribute('data-qty')));
-        writeList(items); renderList(); updateCount();
-        var again = $('[data-i="' + i + '"][data-qty="' + t.getAttribute('data-qty') + '"]', listBody);
-        if (again) again.focus();
-      } else if (t.hasAttribute('data-remove')) {
-        var removed = items.splice(+t.getAttribute('data-remove'), 1)[0];
-        writeList(items); renderList(); updateCount();
-        listStatus.textContent = removed.name + ' removed.';
-        var next = $('button', listBody) || $('[data-list-close]', dialog);
-        next.focus();
-      } else if (t.hasAttribute('data-list-clear')) {
-        writeList([]); renderList(); updateCount();
-        listStatus.textContent = 'Saved items cleared.';
-        $('[data-list-close]', dialog).focus();
-      } else if (t.hasAttribute('data-list-copy')) {
-        copyList(items);
-      }
-    });
-  }
-
-  function copyList(items) {
-    var text = 'integrale — saved items\n' + items.map(function (i) {
-      return '• ' + i.name + (optsText(i) ? ' (' + optsText(i) + ')' : '') + ' × ' + i.qty;
-    }).join('\n');
-    function fallback() {
-      // Clipboard unavailable: show the text so it can be copied by hand.
-      var old = $('.list-copy-fallback', listBody);
-      if (old) old.remove();
-      var ta = document.createElement('textarea');
-      ta.className = 'list-copy-fallback';
-      ta.readOnly = true;
-      ta.setAttribute('aria-label', 'Saved items as text');
-      ta.value = text;
-      listBody.appendChild(ta);
-      ta.focus(); ta.select();
-      listStatus.textContent = 'Copying isn’t available here. The text is selected below so you can copy it yourself.';
-    }
-    if (navigator.clipboard && window.isSecureContext) {
-      // Some browsers never settle the promise when access is blocked.
-      var settled = false;
-      var timer = setTimeout(function () { if (!settled) { settled = true; fallback(); } }, 1500);
-      navigator.clipboard.writeText(text).then(function () {
-        if (settled) return;
-        settled = true; clearTimeout(timer);
-        listStatus.textContent = 'Copied to your clipboard.';
-      }, function () {
-        if (settled) return;
-        settled = true; clearTimeout(timer);
-        fallback();
-      });
-    } else {
-      fallback();
-    }
-  }
-
-  updateCount();
-  window.addEventListener('storage', function (e) { if (e.key === KEY) { updateCount(); if (dialog && dialog.open) renderList(); } });
-
-  /* ---------- Product page ---------- */
-  var pdp = $('[data-product]');
-  if (pdp) {
-    var gallery = $('[data-pdp-gallery]', pdp);
-    var views = $$('[data-view]', pdp);
-    var thumbs = $$('[data-view-btn]', pdp);
-    thumbs.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var n = btn.getAttribute('data-view-btn');
-        views.forEach(function (v) { v.hidden = v.getAttribute('data-view') !== n; });
-        thumbs.forEach(function (b) { b.setAttribute('aria-pressed', String(b === btn)); });
-      });
-    });
-
-    var form = $('[data-pdp-form]', pdp);
-    var status = $('[data-pdp-status]', pdp);
-    form.addEventListener('change', function (e) {
-      var input = e.target;
-      var label = $('[data-opt-value="' + input.name + '"]', form);
-      if (label) label.textContent = input.value;
-      if (input.name === 'colour') {
-        gallery.style.setProperty('--g', input.getAttribute('data-g'));
-        gallery.style.setProperty('--gi', input.getAttribute('data-gi'));
-      }
-      if (input.name === 'size') {
-        var err = $('[data-error="size"]', form);
-        if (err) err.hidden = true;
-      }
-    });
-
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var data = new FormData(form);
-      if ($('[data-required="size"]', form) && !data.get('size')) {
-        $('[data-error="size"]', form).hidden = false;
-        $('input[name="size"]', form).focus();
-        status.textContent = '';
-        return;
-      }
-      var entry = {
-        slug: pdp.getAttribute('data-product'),
-        name: pdp.getAttribute('data-name'),
-        colour: data.get('colour') || '',
-        size: data.get('size') || '',
-        format: data.get('format') || '',
-        qty: 1,
-      };
-      var items = readList();
-      var same = items.filter(function (i) {
-        return i.slug === entry.slug && i.colour === entry.colour && i.size === entry.size && i.format === entry.format;
-      })[0];
-      if (same) same.qty = Math.min(20, same.qty + 1); else items.push(entry);
-      if (!writeList(items)) {
-        status.textContent = 'Your browser isn’t letting this site save anything, so this piece wasn’t saved.';
-        return;
-      }
-      updateCount();
-      status.innerHTML = 'Saved on this device. <button type="button" class="text-button" data-list-open-inline>View saved items</button>';
-      $('[data-list-open-inline]', status).addEventListener('click', function (ev) { openList(ev.currentTarget); });
-    });
-  }
-
   /* ---------- Menu: highlight the category in view ---------- */
   var menuLinks = $$('.menu-bar a[href^="#"]');
   if (menuLinks.length) {
@@ -304,6 +104,55 @@
       if (e.key === 'ArrowRight') { e.preventDefault(); show(current + 1); }
     });
     lb.addEventListener('close', function () { if (opener) opener.focus(); });
+  }
+
+  /* ---------- Transparent header over the home hero ---------- */
+  var siteHeader = $('.site-header');
+  if (siteHeader && document.body.classList.contains('page-home')) {
+    var hTicking = false;
+    var markHeader = function () {
+      hTicking = false;
+      siteHeader.classList.toggle('is-top', window.scrollY < 40);
+    };
+    window.addEventListener('scroll', function () {
+      if (!hTicking) { hTicking = true; requestAnimationFrame(markHeader); }
+    }, { passive: true });
+    markHeader();
+  }
+
+  /* ---------- Scroll reveal ---------- */
+  var toReveal = $$('.reveal');
+  if (toReveal.length) {
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-in');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.18, rootMargin: '0px 0px -8% 0px' });
+      toReveal.forEach(function (el) { io.observe(el); });
+    } else {
+      toReveal.forEach(function (el) { el.classList.add('is-in'); });
+    }
+  }
+
+  /* ---------- Hero parallax (subtle, disabled for reduced motion) ---------- */
+  var parallax = $('[data-parallax]');
+  if (parallax && window.matchMedia('(prefers-reduced-motion: no-preference)').matches && window.matchMedia('(min-width: 900px)').matches) {
+    var pTicking = false;
+    var movePx = function () {
+      pTicking = false;
+      var r = parallax.getBoundingClientRect();
+      var mid = r.top + r.height / 2 - window.innerHeight / 2;
+      var shift = Math.max(-18, Math.min(18, mid * -0.04));
+      parallax.style.transform = 'translateY(' + shift.toFixed(1) + 'px)';
+    };
+    window.addEventListener('scroll', function () {
+      if (!pTicking) { pTicking = true; requestAnimationFrame(movePx); }
+    }, { passive: true });
+    movePx();
   }
 
   /* ---------- Opening hours (only rendered once hours are confirmed) ---------- */

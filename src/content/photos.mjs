@@ -26,7 +26,7 @@ export const photos = {
   counter: {
     alt: 'The coffee bar: an espresso machine, pale blue cups, a lit pastry case and the integrale monogram on the wall, with a barista at work.',
     caption: 'Behind the bar',
-    pos: '42% 50%',
+    pos: '100% 40%',
   },
   lounge: {
     alt: 'Cane-backed chairs and a stone table in daylight by tall windows, with plants and the back of a purple Lamborghini Diablo at the edge of the frame.',
@@ -52,8 +52,8 @@ export const photos = {
   table: {
     alt: 'Two coffees in pale blue integrale cups, glass bottles of water and a slice of cheesecake on a glass table between cane-backed chairs.',
     caption: 'Two coffees and a slice of cheesecake by the window',
-    pos: '42% 64%',
-    posMobile: '34% 70%',
+    pos: '8% 50%',
+    posMobile: '8% 50%',
   },
   facade: {
     alt: 'The integrale sign and monogram on the curved glass front of the building, against a blue sky.',
@@ -94,5 +94,10 @@ export const photos = {
     alt: 'A red sports car with its front compartment open and filled with small, colourful handbags, on a herringbone floor.',
     caption: 'Handbags in the front boot',
     pos: '50% 50%',
+  },
+  'bar-staff': {
+    alt: 'The backlit integrale monogram on the wall behind the bar, with two staff in branded T-shirts working at the counter below.',
+    caption: 'Behind the bar, under the monogram',
+    pos: '50% 15%',
   },
 };

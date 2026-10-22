@@ -6,8 +6,7 @@
 
 import { cpSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { products } from './src/content/products.mjs';
-import { home, space, cafe, shop, product, visit, notFound } from './build/pages.mjs';
+import { home, space, cafe, visit, notFound } from './build/pages.mjs';
 
 const out = new URL('./dist/', import.meta.url).pathname;
 
@@ -19,12 +18,9 @@ const pages = {
   'index.html': home(),
   'space.html': space(),
   'cafe.html': cafe(),
-  'shop.html': shop(),
   'visit.html': visit(),
   '404.html': notFound(),
 };
-for (const p of products) pages[`shop/${p.slug}.html`] = product(p);
-
 for (const [file, content] of Object.entries(pages)) {
   const path = join(out, file);
   mkdirSync(dirname(path), { recursive: true });

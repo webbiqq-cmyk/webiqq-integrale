@@ -55,15 +55,23 @@ export const business = {
 export const nav = [
   { href: '/cafe', label: 'Café & Menu', key: 'cafe' },
   { href: '/space', label: 'The Space', key: 'space' },
-  { href: '/shop', label: 'Shop', key: 'shop' },
   { href: '/visit', label: 'Visit', key: 'visit' },
 ];
 
-// Old routes kept working after renames and catalogue trims.
+// Old routes kept working after renames and catalogue trims. The shop
+// page (and the proposed-collection product pages under it) was removed
+// entirely — it read too much like a checkout for a café that isn't
+// selling anything online. Send any old links back to the homepage.
 export const redirects = [
   { from: '/studio', to: '/space' },
-  { from: '/shop/wordmark-long-sleeve', to: '/shop' },
-  { from: '/shop/murcielago-print', to: '/shop' },
-  { from: '/shop/key-tag', to: '/shop' },
-  { from: '/shop/studio-cap', to: '/shop/cap' },
+  { from: '/shop', to: '/' },
+  { from: '/shop/wordmark-long-sleeve', to: '/' },
+  { from: '/shop/murcielago-print', to: '/' },
+  { from: '/shop/key-tag', to: '/' },
+  { from: '/shop/studio-cap', to: '/' },
+  { from: '/shop/espresso-cup', to: '/' },
+  { from: '/shop/monogram-tee', to: '/' },
+  { from: '/shop/cap', to: '/' },
+  { from: '/shop/canvas-tote', to: '/' },
+  { from: '/shop/diablo-print', to: '/' },
 ];

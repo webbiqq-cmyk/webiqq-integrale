@@ -39,23 +39,13 @@
       "permanent": true
     },
     {
-      "source": "/shop/wordmark-long-sleeve",
-      "destination": "/shop",
+      "source": "/shop",
+      "destination": "/",
       "permanent": true
     },
     {
-      "source": "/shop/murcielago-print",
-      "destination": "/shop",
-      "permanent": true
-    },
-    {
-      "source": "/shop/key-tag",
-      "destination": "/shop",
-      "permanent": true
-    },
-    {
-      "source": "/shop/studio-cap",
-      "destination": "/shop/cap",
+      "source": "/shop/:path*",
+      "destination": "/",
       "permanent": true
     }
   ]
